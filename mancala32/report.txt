@@ -1,0 +1,71 @@
+
+Design of Classes:
+
+Board
+	has a member class Hole which represents Holes on the board. Board has a 2-D vector of Holes called NS (north south) to represent the game board.
+
+Game
+	member function play runs a loop calling the move function. the loop ends if move determines the game is over.
+	member funciton move determines if the game is over (if over returns false), calls the chooseMove function for the player whose turn it is, displays the board, identifies captures and repeat turns, displays the board, returns true.
+
+Player
+	BadPlayer member function chooseMove returns the int of the first legal move. HumanPlayer chooseMove prompts the user to input an integer and verifies that is is a legal move, reprompting ifnot legal. 
+
+SmartPlayer chooseMove constructs a gametree of type TreeNode (an implemented member class). ChooseMove constructs the first level of progeny moves in TreeNode's member vector Children also of type TreeNode. It fills this vector by calling the simulateMove function which returns a copy of the Board representing if that legal move was conducted. The evaluate function determines which of the legal move progeny has the greatest difference between the player and opponents beans in the pot. 
+Unfortunately, I did not have time to make SmartPlayer look more than one move ahead. And the heuristics of the evaluate function is limited to the difference between pots. 
+
+
+Test Cases:
+
+//tests Board constuction and member functions
+	Board Kalah(6, 4);
+	assert(Kalah.holes() == 6);
+	cout << "Passed Board construction test: " << endl;
+	assert(Kalah.beans(NORTH, 2) == 4);
+	cout << "Passed beans in a particular hole test: " << endl;
+	assert(Kalah.beansInPlay(NORTH) == 24);
+	cout << "Passed beansInPlay(side) test: " << endl;
+
+	Side endSide = NORTH;
+	int endHole = -1;
+	assert(Kalah.sow(NORTH, 4, endSide, endHole));
+	assert(Kalah.beans(NORTH, 4) == 0 && Kalah.beans(NORTH, 3) == 5 && Kalah.beans(NORTH, 2) == 5 && Kalah.beans(NORTH, 1) == 5 && Kalah.beans(NORTH, 0) == 1);
+	assert(endHole == 0);
+	assert(endSide == NORTH);
+	cout << "Passed sow tests: " << endl;
+
+
+//tests Game play and determination of the end of the game.
+	BadPlayer bp("Stephen");
+	BadPlayer bp2("Jack");
+	Board Kalah(6, 0);
+	Kalah.setBeans(NORTH, 2, 1);
+	Kalah.setBeans(SOUTH, 2, 1);
+	Game g(Kalah, &bp, &bp2);
+	g.display();
+	Side dum = NORTH;
+	int dumer = 0;
+	g.BoardAccessor()->sow(NORTH, 2,dum,dumer);  
+	g.play();
+
+
+//SmartPlayer indentifies a capture
+	Board Kalah(4, 1);
+	Kalah.setBeans(SOUTH, 4, 0);
+	Kalah.setBeans(NORTH, 4, 5);
+	BadPlayer bp("Stephen");
+	SmartPlayer sp("Ash");
+	Game g(Kalah, &sp, &bp);
+
+	g.play();
+
+
+//SmartPlayer beats BadPlayer and Game identifies a winner at the end
+	Board Kalah(6, 4);
+	Kalah.setBeans(SOUTH, 4, 0);
+	Kalah.setBeans(NORTH, 4, 5);
+	BadPlayer bp("Stephen");
+	SmartPlayer sp("Ash");
+	Game g(Kalah, &sp, &bp);
+
+	g.play();
